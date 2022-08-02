@@ -75,9 +75,11 @@
 		Lock to the nearest <input type="number"oninput="locker=this.value;editDraw()"value="25"></input><br>
 		Shift + Click = Delete. <br>When deleting, click near:<ul><li>top-left corner of rectangular objects</li><li>center of circular objects</li></ul>
 		<span id="version"></span><br>
-<!--		<textarea id="raw"></textarea>-->
+		<button id="download" title="Ctrl + S">Download level</button><a id="a" style="display:none"></a><br>
+		<input type="file" id="upload" style="display:none"><button onclick="upload.click()">Upload Level</button>
 
 		<script>var levels=[{
+		version: 1,
 		start: [],
 		end: [],
 		boxes: [],
@@ -85,16 +87,19 @@
 		lava: [],
 		keys: [],
 		portals: []
-		}],startLevel=0;</script>
+		}],startLevel=0,editing=true;</script>
 		<script src="engine.js"></script>
 		<script>
 			clearInterval(interval);
+			
+			document.getElementById("version").innerText = "Engine: " + version +"\n Editor: v1.0.0";
 			
 			const
 				tools = document.getElementById("tools"),
 				deleteRadius = 30,
 				mousePos = document.getElementById("cursor");
-//				raw = document.getElementById("raw");
+				download = $("#download"),
+				upload = $("#upload");
 
 			var
 				mouse = {
@@ -110,7 +115,38 @@
 			canvas.addEventListener("mousemove", mouseMoveHandler, false);
 //			canvas.addEventListener("mouseleave", mouseUpHandler, false);
 			canvas.addEventListener("mouseup", mouseUpHandler, false);
-//			raw.addEventListener("keyup", ()=>{eval("levels[level]="+raw.innerText)}, false);
+
+			download.onclick = () => {
+				var a = document.getElementById("a");
+				var output=JSON.stringify(levels[level]);
+				a.href = URL.createObjectURL(new Blob([output], {type: "text/json"}));
+				a.download = "level.json";
+				a.click();
+			}
+
+
+			function readFileContent(file) {
+				const reader = new FileReader();
+				return new Promise((resolve, reject) => {
+					reader.onload = event => resolve(event.target.result);
+					reader.onerror = error => reject(error);
+					reader.readAsText(file);
+				});
+			}
+
+			function placeFileContent(target, file) {
+				readFileContent(file).then(content => {
+					levels[0] = JSON.parse(content);
+				}).catch(error => console.log(error))
+			}
+
+			upload.onchange = () => {
+				const input = event.target
+				if ('files' in input && input.files.length > 0) {
+					placeFileContent(levels[0], input.files[0]);
+				}
+			}
+
 
 			function lockReplace(x) {
 				return Math.round(x / locker) * locker;
@@ -335,7 +371,6 @@ function editDrawHint() {
 
 function editDraw() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height)
-//	raw.innerText = JSON.stringify(levels[level]);
 	if (editing) editDrawGrid();
 	drawBlocks();
 	editDrawGoal();

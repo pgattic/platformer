@@ -3,11 +3,12 @@ const
 	canvas = document.getElementById("platformer"),
 	ctx = canvas.getContext("2d"),
 	pauseMenu = document.getElementById("pause"),
+	$=x=>{return document.querySelector(x)},
 
 	startingLives = 5,
 	goalRadius = 15,
 	goalThickness = 12,
-	version = "v1.0.3";
+	version = "v1.1.0";
 
 var
 	level = startLevel,
@@ -19,6 +20,7 @@ var
 	textIterator = 0,
 	goalRad = 0,
 	paused = false,
+	editing = (editing?true:false),
 
 	player = {
 		xVel : 0,
@@ -43,7 +45,7 @@ var
 	floorFriction : 0.99,
 	};
 
-document.getElementById("version").innerText = "Copyright SaveState. " + version;
+document.getElementById("version").innerText = "pgattic " + version;
 
 canvas.width = 600;
 canvas.height = 600;
@@ -61,7 +63,7 @@ function keyDownHandler(e) {
 	if (e.key == "ArrowUp") {
 		player.upPressed = true;
 	}
-	if (e.key == "Escape") {
+	if (e.key == "Escape" && level>1) {
 		togglePause();
 	}
 }
@@ -353,6 +355,10 @@ function main() { // one function for physics, and one to draw to the canvas
 }
 
 function init() { // used to start and restart levels
+	if (!editing) {
+		if (level > 1) {$("#title").style.display="none"; $("#ptip").style.display="block"}
+		else {$("#title").style.display="block"; $("#ptip").style.display="none"}	
+	}
 	if (levels[level].start) {
 		player.x = levels[level].start[0];
 		player.y = levels[level].start[1];

@@ -1,5 +1,7 @@
+const startLevel = 1;
+
 const levels = [
-	{
+	{ // test level, doesn't play (unless you set the previous const to 0)
 		start: [50, 50],
 		end: [550, 375],
 		boxes: [ // [x, y, width]
@@ -11,10 +13,10 @@ const levels = [
 		lava: [ // [x, y, width, height]
 		]
 	}, {//1
-		start: [25, 350],
-		end: [550, 375],
+		start: [25, 400],
+		end: [550, 425],
 		boxes: [
-			[0, 400, 600],
+			[0, 450, 600],
 		],
 		text: "Reach the GOAL to finish the LEVEL.",
 	}, {//2
@@ -130,7 +132,5 @@ const levels = [
 	}, {"start":[233,287],"end":[312,453],"boxes":[[205,337,105],[265,482,95],[428,259,115]],"text":"Good luck with this one.","lava":[[112,352,52,62],[420,316,54,41]],"keys":[[482,185],[54,254]]}, // 10
 	
 	
-{}],
-
-startLevel = 1;
+{}];
 
