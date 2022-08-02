@@ -20,7 +20,7 @@ var
 	textIterator = 0,
 	goalRad = 0,
 	paused = false,
-	editing = (editing?true:false),
+	inEditor = (inEditor?true:false),
 
 	player = {
 		xVel : 0,
@@ -63,7 +63,7 @@ function keyDownHandler(e) {
 	if (e.key == "ArrowUp") {
 		player.upPressed = true;
 	}
-	if (e.key == "Escape" && level>1) {
+	if (e.key == "Escape" && (level>1 || inEditor)) {
 		togglePause();
 	}
 }
@@ -355,8 +355,8 @@ function main() { // one function for physics, and one to draw to the canvas
 }
 
 function init() { // used to start and restart levels
-	if (!editing) {
-		if (level > 1) {$("#title").style.display="none"; $("#ptip").style.display="block"}
+	if (!inEditor) {
+		if (level > 1 && !inEditor) {$("#title").style.display="none"; $("#ptip").style.display="block"}
 		else {$("#title").style.display="block"; $("#ptip").style.display="none"}	
 	}
 	if (levels[level].start) {
