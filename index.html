@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			#main {
+				margin: auto;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				-ms-transform: translate(-50%, -50%);
+				transform: translate(-50%, -50%);
+				
+			}
+			canvas {
+				background: #ccc;
+				border-radius: 8px;
+				transition:.25s;
+			}
+			#pause {
+				background: #aaa;
+				margin: 0;
+				padding: 10px;
+				font: 36px Arial;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				-ms-transform: translate(-50%, -50%);
+				transform: translate(-50%, -50%);
+				display: none;
+				place-items: center;
+				border: 1px solid black;
+				border-radius: 5px;
+			}
+			#pause button {
+				background-color: #777;
+				border: 1px solid black;
+				margin: 1px;
+				border-radius: 5px;
+			}
+			p {
+				position: absolute;
+				font-family: Courier;
+				margin: 0;
+				padding:5px;
+				background: white;
+			}
+			
+		</style>
+	</head>
+	<body>
+		<div id="main">
+			<canvas id="platformer">Your browser doesn't support the HTML5 canvas element!</canvas>
+			<div id="pause">
+				PAUSED<br>
+				<button onclick="togglePause()">Resume</button>
+				<button onclick="togglePause();init()">Restart Level</button>
+				<button onclick="togglePause();level=(level>1?level-1:level);init()">Previous Level</button>
+				<button onclick="togglePause();level=startLevel;init()">Clear Progress</button>
+			</div>
+			<p id="version" style="bottom:0;right:0;font-size:12px;border-radius: 8px 0 0 0;"></p>
+			<p style="top:0;right:0;font-size:12px;border-radius: 0 0 0 8px;">Press Esc to Pause</p>
+		</div>
+		<script src="levels.js"></script>
+		<script src="engine.js"></script>
+	</body>
+</html>
