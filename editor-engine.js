@@ -5,7 +5,7 @@
 
 clearInterval(interval);
 
-document.getElementById("version").innerText = "Engine: " + version +"\n Editor: v1.0.0";
+document.getElementById("version").innerText = "Engine: " + version +"\n Editor: v1.2.0";
 
 const
 	tools = document.getElementById("tools"),
@@ -16,8 +16,8 @@ const
 
 var
 	mouse = {
-		downX : NaN,
-		downY : NaN,
+//		downX : NaN,
+//		downY : NaN,
 		x : NaN,
 		y : NaN,
 	},
@@ -28,6 +28,7 @@ canvas.addEventListener("mousedown", mouseDownHandler, false);
 canvas.addEventListener("mousemove", mouseMoveHandler, false);
 //canvas.addEventListener("mouseleave", mouseUpHandler, false);
 canvas.addEventListener("mouseup", mouseUpHandler, false);
+document.addEventListener("mouseup", mouseUpHandler, false);
 
 download.onclick = () => {
 	var a = document.getElementById("a");
@@ -69,14 +70,14 @@ function mouseDownHandler(e) {
 	switch (tools.value) {
 		case "start":
 			if (e.shiftKey) {
-				var dist = Math.sqrt((levels[level].start[0] - lockReplace(e.offsetX)) ** 2 + (levels[level].start[1] - lockReplace(e.offsetY)) ** 2);
+				var dist = Math.sqrt(((levels[level].start[0]+player.size[player.stage]/2) - lockReplace(e.offsetX)) ** 2 + ((levels[level].start[1]+player.size[player.stage]/2) - lockReplace(e.offsetY)) ** 2);
 				if (dist < deleteRadius) {
 					levels[level].start[0] = NaN;
 					levels[level].start[1] = NaN;
 				}
 			} else if (levels[level].start) {
-				levels[level].start[0] = lockReplace(e.offsetX);
-				levels[level].start[1] = lockReplace(e.offsetY);
+				levels[level].start[0] = lockReplace(e.offsetX)-player.size[player.stage]/2;
+				levels[level].start[1] = lockReplace(e.offsetY)-player.size[player.stage]/2;
 			}
 			break;
 		case "end":
@@ -159,31 +160,41 @@ function mouseMoveHandler(e) {
 	if (e.buttons == 1 && !e.shiftKey) {
 		switch (tools.value) {
 			case "plat":
-				if (levels[level].boxes.length > 0) levels[level].boxes[0][2] = lockReplace(e.offsetX) - levels[level].boxes[0][0];
+				if (levels[level].boxes.length > 0) {
+					levels[level].boxes[0][2] = lockReplace(e.offsetX) - levels[level].boxes[0][0];
+					holdingPlat = true;
+				}
 				break;
 			case "lava":
 				if (levels[level].lava.length > 0) {
 					levels[level].lava[0][2] = lockReplace(e.offsetX) - levels[level].lava[0][0];
 					levels[level].lava[0][3] = lockReplace(e.offsetY) - levels[level].lava[0][1];
+					holdingLava = true;
 				}
 				break;
 			case "port":
 				if (levels[level].portals.length > 0) {
 					levels[level].portals[0][1][0] = lockReplace(e.offsetX);
 					levels[level].portals[0][1][1] = lockReplace(e.offsetY);
+					holdingPort = true;
 				}
 				break;
 		}
 	}
-	mousePos.innerText = lockReplace(e.offsetX) + ", " + lockReplace(e.offsetY);
+	mouse.x = e.offsetX;
+	mouse.y = e.offsetY;
+	mousePos.innerText = lockReplace(mouse.x) + ", " + lockReplace(mouse.y);
 	if (editing) editDraw();
 }
 
 function mouseUpHandler(e) {
-	if (!e.shiftKey) {
+	if (!e.shiftKey && (holdingLava||holdingPlat||holdingPort)) {
+		var rect = canvas.getBoundingClientRect();
+		mouse.x = e.clientX - rect.left;
+		mouse.y = e.clientY - rect.top;
 		switch (tools.value) {
 			case "plat":
-				levels[level].boxes[0][2] = lockReplace(e.offsetX) - levels[level].boxes[0][0];
+				levels[level].boxes[0][2] = lockReplace(mouse.x) - levels[level].boxes[0][0];
 				if (levels[level].boxes[0][2] < 0) {
 					levels[level].boxes[0][0] += levels[level].boxes[0][2];
 					levels[level].boxes[0][2] = -levels[level].boxes[0][2]
@@ -193,8 +204,8 @@ function mouseUpHandler(e) {
 				}
 				break;
 			case "lava":
-				levels[level].lava[0][2] = lockReplace(e.offsetX) - levels[level].lava[0][0];
-				levels[level].lava[0][3] = lockReplace(e.offsetY) - levels[level].lava[0][1];
+				levels[level].lava[0][2] = lockReplace(mouse.x) - levels[level].lava[0][0];
+				levels[level].lava[0][3] = lockReplace(mouse.y) - levels[level].lava[0][1];
 				if (levels[level].lava[0][2] < 0) {
 					levels[level].lava[0][0] += levels[level].lava[0][2];
 					levels[level].lava[0][2] = -levels[level].lava[0][2]
@@ -208,12 +219,15 @@ function mouseUpHandler(e) {
 				}
 				break;
 			case "port":
-				levels[level].portals[0][1][0] = lockReplace(e.offsetX);
-				levels[level].portals[0][1][1] = lockReplace(e.offsetY);
+				levels[level].portals[0][1][0] = lockReplace(mouse.x);
+				levels[level].portals[0][1][1] = lockReplace(mouse.y);
 				break;
 		}
 		editDraw();
 	}
+	holdingLava = false, // these holding vars help determine if any of these are currently being added to the level (so it can make them translucent).
+	holdingPlat = false,
+	holdingPort = false;
 }
 
 function editDrawGrid() {
@@ -244,7 +258,15 @@ function editDrawGoal() { // draws the green goal semicircle
 		ctx.arc(levels[level].end[0], levels[level].end[1], goalRadius, 0, Math.PI * 2);
 		ctx.lineWidth = goalThickness;
 		ctx.stroke();
-		ctx.closePath();
+	}
+	if (tools.value == "end") {
+		ctx.beginPath();
+		ctx.arc(lockReplace(mouse.x), lockReplace(mouse.y), goalRadius, 0, Math.PI * 2);
+		ctx.lineWidth = goalThickness;
+		ctx.strokeStyle = "green";
+		ctx.globalAlpha = 0.5;
+		ctx.stroke();
+		ctx.globalAlpha = 1;
 	}
 }
 
@@ -255,8 +277,15 @@ function editDrawKeys() { // Draws the blue circular keys.
 			ctx.arc(levels[level].keys[i][0], levels[level].keys[i][1], goalRadius, 0, Math.PI*2);
 			ctx.fillStyle = "yellow"
 			ctx.fill();
-			ctx.closePath();
 		}
+	}
+	if (tools.value == "keys") {
+		ctx.beginPath();
+		ctx.arc(lockReplace(mouse.x), lockReplace(mouse.y), goalRadius, 0, Math.PI*2);
+		ctx.fillStyle = "yellow"
+		ctx.globalAlpha = 0.5;
+		ctx.fill();
+		ctx.globalAlpha = 1;
 	}
 }
 
@@ -266,7 +295,16 @@ function editDrawSprite(obj) {
 	ctx.rect(levels[level].start[0], levels[level].start[1] - canvas.height, obj.size[obj.stage], obj.size[obj.stage]);
 	ctx.fillStyle = obj.color;
 	ctx.fill();
-	ctx.closePath();
+
+	if (tools.value == "start") {
+		ctx.beginPath();
+		ctx.rect(lockReplace(mouse.x-obj.size[obj.stage]/2), lockReplace(mouse.y-obj.size[obj.stage]/2), obj.size[obj.stage], obj.size[obj.stage]);
+		ctx.rect(lockReplace(mouse.x-obj.size[obj.stage]/2), lockReplace(mouse.y-obj.size[obj.stage]/2) - canvas.height, obj.size[obj.stage], obj.size[obj.stage]);
+		ctx.fillStyle = obj.color;
+		ctx.globalAlpha = 0.5;
+		ctx.fill();
+		ctx.globalAlpha = 1;
+	}
 }
 
 function editDrawHint() {

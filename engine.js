@@ -8,7 +8,7 @@ const
 	startingLives = 5,
 	goalRadius = 15,
 	goalThickness = 12,
-	version = "v1.1.0";
+	version = "v1.1.5";
 
 var
 	level = startLevel,
@@ -43,7 +43,10 @@ var
 	vertAcceleration : [0.03, 0.04],
 	bounce : 0.35,
 	floorFriction : 0.99,
-	};
+	},
+	holdingLava = false, // these holding vars help determine if any of these are currently being added to the level (so it can make them translucent).
+	holdingPlat = false, // So, these variables are only functionally used in the editor :)
+	holdingPort = false;
 
 document.getElementById("version").innerText = "pgattic " + version;
 
@@ -214,7 +217,14 @@ function drawBlocks() { // Draws the platforms.
 			ctx.beginPath();
 			ctx.rect(i[0], i[1], i[2], 10);
 			ctx.fillStyle = "black";
-			ctx.fill();
+			if (i == levels[level].boxes[0] && holdingPlat) {
+				ctx.globalAlpha = 0.5;
+				ctx.fill();
+				ctx.globalAlpha = 1;
+			} else {
+				ctx.fill();
+			}
+			ctx.closePath();
 			ctx.closePath();
 		}
 	}
@@ -257,13 +267,15 @@ function drawKeys() { // Draws the blue circular keys.
 function drawPortals() {
 	if (levels[level].portals) {
 		for (var i = 0; i < levels[level].portals.length; i++) {
+			if (i == 0 && holdingPort) {
+				ctx.globalAlpha = 0.5;
+			}
 			ctx.beginPath();
 			ctx.lineWidth = 4;
 			ctx.strokeStyle = "purple";
 			ctx.moveTo(levels[level].portals[i][0][0], levels[level].portals[i][0][1]);
 			ctx.lineTo(levels[level].portals[i][1][0], levels[level].portals[i][1][1]);
 			ctx.stroke();
-			ctx.closePath();
 
 			ctx.beginPath();
 			ctx.fillStyle = "#ccc";
@@ -271,7 +283,6 @@ function drawPortals() {
 			ctx.arc(levels[level].portals[i][0][0], levels[level].portals[i][0][1], goalRadius, 0, Math.PI*2);
 			ctx.fill();
 			ctx.stroke();
-			ctx.closePath();
 
 			ctx.beginPath();
 			ctx.fillStyle = "#ccc";
@@ -279,7 +290,8 @@ function drawPortals() {
 			ctx.arc(levels[level].portals[i][1][0], levels[level].portals[i][1][1], goalRadius, 0, Math.PI*2);
 			ctx.fill();
 			ctx.stroke();
-			ctx.closePath();
+
+			ctx.globalAlpha = 1;
 		}
 	}
 }
@@ -295,11 +307,17 @@ function drawSprite(obj) { // Draws the player, can be used to draw other square
 
 function drawLava() { // Draws the lava rectangles.
 	if (levels[level].lava) {
-		for (var i of levels[level].lava) {
+		for (var i = 0; i < levels[level].lava.length; i++) {
 			ctx.beginPath();
-			ctx.rect(i[0], i[1], i[2], i[3]);
+			ctx.rect(levels[level].lava[i][0], levels[level].lava[i][1], levels[level].lava[i][2], levels[level].lava[i][3]);
 			ctx.fillStyle = "red";
-			ctx.fill();
+			if (i == 0 && holdingLava) {
+				ctx.globalAlpha = 0.5;
+				ctx.fill();
+				ctx.globalAlpha = 1;
+			} else {
+				ctx.fill();
+			}
 			ctx.closePath();
 		}
 	}

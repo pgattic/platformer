@@ -73,11 +73,12 @@
 		</form>
 		Level text tips (optional):<br><input type="text"id="text"oninput="levels[level].text=this.value;editDraw()"></input><br>
 		Mouse position: <span id="cursor"></span><br>
-		Lock to the nearest <input type="number"oninput="locker=this.value;editDraw()"value="25"></input><br>
-		Shift + Click = Delete. <br>When deleting, click near:<ul><li>top-left corner of rectangular objects</li><li>center of circular objects</li></ul>
-		<span id="version"></span><br>
+		Lock to the nearest <input type="number"oninput="locker=this.value;editDraw()"value="25"style="width: 36px"></input><br>
+		<b>Shift + Click = Delete. </b><br>
+		When deleting platforms or lava, <br>click near the top-left corner.<br>
 		<button id="download" title="Ctrl + S">Download level</button><a id="a" style="display:none"></a><br>
-		<input type="file" id="upload" style="display:none" accept=".json"><button onclick="upload.click()">Upload Level</button>
+		<input type="file" id="upload" style="display:none" accept=".json"><button onclick="upload.click()">Upload Level</button><br>
+		<span id="version"></span><br>
 
 		<script>var levels=[{
 		version: 1,
